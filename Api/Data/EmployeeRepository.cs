@@ -51,6 +51,24 @@ namespace EmployeeManagement.Data
             }
         }
 
+        public async Task<bool> HasSSNNumberAsync(string ssn)
+        {
+            using (IDbConnection connection = this.GetConnection())
+            {
+                string query = @"SELECT 
+                                  CASE 
+                                    WHEN EXISTS (
+                                      SELECT 1 
+                                      FROM Employee 
+                                      WHERE SSN = @ssn
+                                    ) THEN CAST(1 AS BIT)
+                                    ELSE CAST(0 AS BIT)
+                                  END AS SSNExists;";
+
+                return  await connection.QuerySingleAsync<bool>(query, new { ssn }, commandType: CommandType.Text);
+            }
+        }
+
         public async Task<EmployeeDetails> AddEmployeeAsync(EmployeeDetails employeeData)
         {
             using(IDbConnection connection = this.GetConnection())

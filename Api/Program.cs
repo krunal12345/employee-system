@@ -30,6 +30,9 @@ namespace EmployeeManagement
 
             #endregion
 
+            builder.Services.AddCors();
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -38,6 +41,13 @@ namespace EmployeeManagement
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors(policy =>
+            {
+                policy.WithOrigins("http://localhost:4200", "https://krunal12345.github.io")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
 
             app.UseHttpsRedirection();
 

@@ -30,6 +30,13 @@ namespace EmployeeManagement.Controllers
             return Ok(await _employeeService.GetPositionDetailsAsync());
         }
 
+        [HttpGet]
+        [Route("hasSSN")]
+        public async Task<ActionResult<bool>> HasSSNNumberAsync(string ssn)
+        {
+            return Ok(await this._employeeService.HasSSNNumberAsync(ssn));
+        }
+
         [HttpPost]
         [Route("employees")]
         public async Task<ActionResult<EmployeeDetails>> AddEmployeeDetailsAsync(EmployeeDetails employeeDetails)

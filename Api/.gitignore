@@ -1,0 +1,50 @@
+## === VISUAL STUDIO ===
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+## === BUILD OUTPUT ===
+bin/
+obj/
+[Bb]uild/
+[Ll]ogs/
+TestResults/
+*.log
+
+## === DOTNET TOOLING ===
+*.nupkg
+*.snupkg
+*.dbmdl
+*.dbschema
+*.pfx
+*.publish.xml
+
+## === SQL SERVER PROJECT ===
+*.sqlproj.user
+*.sqlproj.vspscc
+*.dbmdl
+*.jfm
+*.vssscc
+*.mdf
+*.ldf
+
+## === TEMPORARY / CACHE FILES ===
+*.tmp
+*.temp
+*.cache
+*.vspscc
+
+## === RIDER / JETBRAINS ===
+.idea/
+*.DotSettings.user
+
+## === OS-SPECIFIC ===
+.DS_Store
+Thumbs.db
+
+## === DOTNET GLOBAL TOOLS ===
+**/.dotnet-tools/

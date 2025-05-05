@@ -1,0 +1,53 @@
+<div class="employee-list__container">
+
+  <div nz-row nzAlign="middle" class="mb-20">
+    <div>
+      <app-search-input [clearSearchText]="clearSearchText()" (searchText)="searchEmployee($event)"
+        (clearSearch)="clearSearch()">
+      </app-search-input>
+    </div>
+    <div nz-col>
+      <button nz-button class="ml-12" nzType="default" nzSize="large" (click)="onAddEmployee()">Add Employee</button>
+    </div>
+  </div>
+
+  <app-add-employee-modal [openModal]="isAddEmployeeModalOpen()" (modalClosed)="addEmployeeModalClose()"
+    (addEmployee)="addEmployee($event)">
+  </app-add-employee-modal>
+
+  <nz-table #basicTable nzBordered class="employees-table" [nzScroll]="{ y: 'calc(100vh - 330px)' }"
+    [nzShowPagination]="false" [nzPageSize]="pageSize" [nzData]="employeesList()">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Title</th>
+        <th>SSN</th>
+        <th>Salary</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Phone</th>
+        <th>JoinDate</th>
+        <th>ExitDate</th>
+        <th>Dob</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (data of basicTable.data; track data) {
+      <tr>
+        <td [innerText]="data.name"></td>
+        <td [innerText]="data.currentTitle"></td>
+        <td [innerText]="data.ssn"></td>
+        <td [innerText]="data.currentSalary"></td>
+        <td [innerText]="data.address"></td>
+        <td [innerText]="data.city"></td>
+        <td [innerText]="data.state"></td>
+        <td [innerText]="data.phone"></td>
+        <td [innerText]="data.joinDate  | date:'dd/MM/yyyy'"></td>
+        <td [innerText]="data.exitDate ? (data.exitDate | date:'dd/MM/yyyy') : '-' "></td>
+        <td [innerText]="data.dob | date:'dd/MM/yyyy'"></td>
+      </tr>
+      }
+    </tbody>
+  </nz-table>
+</div>

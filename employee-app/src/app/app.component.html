@@ -1,0 +1,14 @@
+<router-outlet />
+
+<div class="employee-root">
+  <h1>Employee management system</h1>
+  
+  <nz-tabset class="tabs" [nzSize]="'large'">
+    <nz-tab nzTitle="Employees">
+      <app-employee-list></app-employee-list>
+    </nz-tab>
+    <nz-tab nzTitle="Positions">
+      <app-positions-list></app-positions-list>
+    </nz-tab>
+  </nz-tabset>
+</div>

@@ -7,5 +7,7 @@ namespace EmployeeManagement.Service.Contract
         public Task<IEnumerable<EmployeeDetails>> GetEmployeeListAsync(string? search);
         public Task<IEnumerable<PositionDetails>> GetPositionDetailsAsync();
         public Task<EmployeeDetails> AddEmployeeAsync(EmployeeDetails employeeData);
+        public Task<bool> HasSSNNumberAsync(string ssn);
+
     }
 }

@@ -1,0 +1,27 @@
+<div class="positions-table__container">
+
+  <div class="search-input-container w-30">
+    <app-search-input (searchText)="searchPosition($event)" (clearSearch)="clearSearch()">
+    </app-search-input>
+  </div>
+
+  <nz-table #basicTable nzBordered class="employees-table" [nzScroll]="{ y: 'calc(100vh - 330px)' }"
+    [nzShowPagination]="false" [nzPageSize]="pageSize" [nzData]="positionList()">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Max Salary</th>
+        <th>Min salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (data of basicTable.data; track data) {
+      <tr>
+        <td [innerText]="data.title"></td>
+        <td [innerText]="data.maxSalary "></td>
+        <td [innerText]="data.minSalary"></td>
+      </tr>
+      }
+    </tbody>
+  </nz-table>
+</div>

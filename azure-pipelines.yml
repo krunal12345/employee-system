@@ -1,0 +1,68 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - Api/**       # Include changes in the backend API folder
+      - azure-pipelines.yml # Include changes to the pipeline configuration itself
+    exclude:
+      - employee-app/** # Exclude changes in the frontend folder
+
+pool:
+  name: Default 
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+# -------------------------
+# STAGE 1: BUILD & PUBLISH
+# -------------------------
+- stage: Build
+  jobs:
+
+  - job: BuildAndTest
+    workspace: 
+      clean: all 
+    steps:
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        arguments: '--configuration $(buildConfiguration) --output $(build.artifactStagingDirectory)'
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(build.artifactStagingDirectory)'
+        ArtifactName: 'employee-api'
+        publishLocation: Container
+
+# -------------------------
+# STAGE 2: DEPLOY TO AZURE
+# -------------------------
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+    - job: DeployWebApp
+      steps:
+      - download: current
+        artifact: employee-api
+
+      - task: AzureWebApp@1
+        inputs:
+          azureSubscription: 'employee-app-deployment'
+          appType: 'webApp'
+          appName: 'employee-system'
+          package: $(Pipeline.Workspace)/employee-api/**/*.zip
+
+

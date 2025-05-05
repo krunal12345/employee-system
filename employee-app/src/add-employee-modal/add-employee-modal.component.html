@@ -1,0 +1,174 @@
+<ng-template #addEmployeeContent>
+  <div class="add-employee-container">
+    <form nz-form [formGroup]="employeeForm" (ngSubmit)="submitForm()">
+      <div nz-row class="mb-12" [nzGutter]="12">
+        <div nz-col [nzSpan]="12">
+          <!-- Position -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired nzFor="position">Title</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter position">
+              <input nz-input formControlName="position" id="position" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- Name -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired nzFor="name">Name</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter name">
+              <input nz-input formControlName="name" id="name" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- SSN -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzRequired nzFor="ssn">SSN</nz-form-label>
+            <nz-form-control [nzErrorTip]="ssnError">
+              <input nz-input formControlName="ssn" id="ssn" />
+            </nz-form-control>
+
+            <ng-template #ssnError>
+              @if (ssn !== null && ssn.invalid && (ssn.dirty || ssn.touched)) {
+              @if (ssn.hasError('required')) {
+              Please Enter SSN number
+              }@else if(ssn.hasError('pattern')){
+              Invalid SSN format. Please enter a valid SSN in the format: XXX-XX-XXXX
+              }
+              @else if (ssn.hasError('uniqueSSN')) {
+              This SSN is already registered. Please use a different SSN.
+              }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- Phone number -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="phoneNumber" nzRequired>Phone</nz-form-label>
+            <nz-form-control [nzErrorTip]="phoneNumberError">
+              <nz-input-group>
+                <input formControlName="phoneNumber" id="'phoneNumber'" nz-input />
+              </nz-input-group>
+            </nz-form-control>
+            <ng-template #phoneNumberError>
+              @if (phoneNumber !== null && phoneNumber.invalid && (phoneNumber.dirty || phoneNumber.touched)) {
+              @if (phoneNumber.hasError('required')) {
+              Please Enter Phone number
+              }@else if(phoneNumber.hasError('pattern')){
+              Invalid phone number format. Please enter a 10-digit phone number without spaces or special characters.
+              }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row class="mb-12" [nzGutter]="12">
+        <div nz-col [nzSpan]="12">
+          <!-- Address -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="address" nzRequired>Address</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter address">
+              <textarea nz-input formControlName="address" id="address" [nzAutosize]="{ minRows: 3, maxRows: 4 }">
+              </textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- city -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="city" nzRequired>City</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter city">
+              <input nz-input formControlName="city" id="city" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- State -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="state" nzRequired>State</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter state">
+              <input nz-input formControlName="state" id="state" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <!-- Zip Code -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="zipCode" nzRequired>Zip Code</nz-form-label>
+            <nz-form-control [nzErrorTip]="zipCodeError">
+              <input nz-input formControlName="zipCode" id="zipCode" />
+            </nz-form-control>
+            <ng-template #zipCodeError>
+              @if (zipCode !== null && zipCode.invalid && (zipCode.dirty || zipCode.touched)) {
+              @if (zipCode.hasError('required')) {
+              Please Enter Zip Code
+              }@else if(zipCode.hasError('uniqueZipCode')){
+              }@else if(zipCode.hasError('pattern')){
+              Invalid Zip Code format. Please enter a valid postal code based on your country.
+              }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- salary -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="salary" nzRequired>Salary</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter salary">
+              <nz-input-number class="w-100" nzMin="0" nzMax="Infinity" formControlName="salary" id="salary" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row class="mt-12" [nzGutter]="12">
+        <div nz-col [nzSpan]="12">
+          <!-- DOB -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="dob" nzRequired>DOB</nz-form-label>
+            <nz-form-control [nzErrorTip]="dobError">
+              <nz-date-picker class="w-100" formControlName="dob" id="dob"></nz-date-picker>
+            </nz-form-control>
+            <ng-template #dobError>
+              @if (dob !== null && dob.invalid && (dob.dirty || dob.touched)) {
+              @if (dob.hasError('required')) {
+              Please Enter Date of Birth
+              }@else if(dob.hasError('age')){
+              Employee must be between 22 and 64 years old.
+              }@else if (dob.hasError('future')) {
+              Date of birth cannot be in the future.
+              }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <!-- Joining Date -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="6" nzFor="joinDate" nzRequired>Join Date</nz-form-label>
+            <nz-form-control [nzErrorTip]="joinDateError">
+              <nz-date-picker class="w-100" formControlName="joinDate" id="joinDate"></nz-date-picker>
+            </nz-form-control>
+            <ng-template #joinDateError>
+              @if (joinDate !== null && joinDate.invalid && (joinDate.dirty || joinDate.touched)) {
+              @if (joinDate.hasError('required')) {
+              Please Enter Joining Date
+              }@else if(joinDate.hasError('past')){
+              Joining date cannot be in the past.
+              }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item nz-row class="register-area">
+        <nz-form-control>
+          <button nz-button nzType="primary">Add Employee</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+</ng-template>

@@ -1,0 +1,13 @@
+<div class="input-search__container">
+  <nz-input-group class="search-input" [nzSize]="'large'" [nzSuffix]="suffixIconSearch">
+    <input type="text" nz-input placeholder="search by name or title" [(ngModel)]="searchTerm"
+      (ngModelChange)="onSerachText($event)" />
+  </nz-input-group>
+  <ng-template #suffixIconSearch>
+    @if(searchTerm() == ''){
+    <nz-icon nzType="search" />
+    }@else {
+    <nz-icon class="cursor-pointer" nzType="close-circle" nzTheme="outline" (click)="clearClick()" />
+    }
+  </ng-template>
+</div>

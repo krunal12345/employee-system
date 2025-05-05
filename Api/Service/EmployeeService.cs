@@ -26,5 +26,10 @@ namespace EmployeeManagement.Service
         {
             return await this._employeeRepository.AddEmployeeAsync(employeeData);
         }
+
+        public async Task<bool> HasSSNNumberAsync(string ssn)
+        {
+            return await this._employeeRepository.HasSSNNumberAsync(ssn);
+        }
     }
 }

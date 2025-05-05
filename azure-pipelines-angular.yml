@@ -1,0 +1,187 @@
+# azure-pipelines-angular.yml
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - employee-app/**
+      - azure-pipelines-angular.yml
+    exclude:
+      - Api/**
+
+pool:
+  name: Default
+
+# 1) Get a full history so our gh-pages push won't fail
+steps:
+- checkout: self
+  clean: true
+  fetchDepth: 0     # ← disable shallow clones
+  displayName: 'Checkout (full history)'
+
+# 2) Build Angular with improved logging for Windows agents
+- task: NodeTool@0
+  inputs:
+    versionSpec: '22.x'
+  displayName: 'Install Node.js'
+
+- powershell: |
+    Write-Host "Node version:"
+    node -v
+    Write-Host "NPM version:"
+    npm -v
+  displayName: 'Check Node/NPM Version'
+
+- powershell: |
+    Write-Host "Installing Angular CLI..."
+    npm install @angular/cli@19.2.8 -g
+    Write-Host "Angular CLI version:"
+    ng version
+  workingDirectory: 'employee-app'
+  displayName: 'Install Angular CLI 19'
+
+- powershell: |
+    Write-Host "=== PACKAGE.JSON CONTENTS ==="
+    Get-Content package.json
+    Write-Host "=== AVAILABLE SCRIPTS ==="
+    $packageJson = Get-Content package.json -Raw | ConvertFrom-Json
+    Write-Host "Scripts available in package.json:"
+    $packageJson.scripts | Format-Table Name, Value -AutoSize
+  workingDirectory: 'employee-app'
+  displayName: 'Show Package.json'
+
+- powershell: |
+    Write-Host "Starting npm install with verbose logging..."
+    npm install --verbose
+    Write-Host "npm install completed."
+  workingDirectory: 'employee-app'
+  displayName: 'Install Dependencies (Verbose)'
+
+- powershell: |
+    Write-Host "=== STARTING ANGULAR BUILD ==="
+    
+    # Check if prod-build exists in package.json
+    $packageJson = Get-Content package.json -Raw | ConvertFrom-Json
+    if ($packageJson.scripts.PSObject.Properties.Name -contains "prod-build") {
+        Write-Host "Running npm run prod-build..."
+        npm run prod-build
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed with exit code: $LASTEXITCODE"
+            exit $LASTEXITCODE
+        }
+    } else {
+        Write-Host "ERROR: prod-build script not found in package.json"
+        Write-Host "Available scripts:"
+        $packageJson.scripts | Format-Table Name, Value -AutoSize
+        
+        Write-Host "Falling back to standard build command..."
+        ng build --configuration production
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed with exit code: $LASTEXITCODE"
+            exit $LASTEXITCODE
+        }
+    }
+    
+    Write-Host "Build completed. Checking output directory..."
+    if (Test-Path "dist") {
+        Write-Host "Contents of dist folder:"
+        Get-ChildItem -Path "dist" -Recurse | Format-Table FullName
+    } else {
+        Write-Host "dist folder not found in current directory"
+    }
+  workingDirectory: 'employee-app'
+  displayName: 'Build Angular App'
+
+# Debug task to find out what directories exist
+- task: PowerShell@2
+  displayName: 'Debug - List Directory Structure'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "==== ROOT DIRECTORIES IN WORKSPACE ====="
+      Get-ChildItem -Path "$(Build.SourcesDirectory)" | Format-Table Name, LastWriteTime, Length
+      
+      Write-Host "==== EMPLOYEE-APP DIRECTORY CONTENTS ====="
+      Get-ChildItem -Path "$(Build.SourcesDirectory)\employee-app" | Format-Table Name, LastWriteTime, Length
+      
+      Write-Host "==== CHECKING BUILD OUTPUT LOCATIONS ====="
+      $distPaths = @(
+          "$(Build.SourcesDirectory)\employee-app\dist",
+          "$(Build.SourcesDirectory)\dist",
+          "$(Build.SourcesDirectory)\employee-app\dist\employee-app",
+          "$(Build.SourcesDirectory)\employee-app\dist\browser"
+      )
+      
+      foreach ($path in $distPaths) {
+          Write-Host "Checking if $path exists: $(Test-Path $path)"
+          if (Test-Path $path) {
+              Write-Host "Contents of $path:"
+              Get-ChildItem -Path $path -Recurse | ForEach-Object { Write-Host $_.FullName }
+          }
+      }
+
+# Deployment task with improved error handling
+- task: PowerShell@2
+  displayName: 'Deploy to GitHub Pages (PowerShell)'
+  inputs:
+    targetType: 'inline'
+    script: |
+      # 1) Find build output directory - try multiple possible locations
+      $foundBuildDir = $false
+      $possibleDirs = @(
+          "$(Build.SourcesDirectory)\employee-app\dist\browser",
+          "$(Build.SourcesDirectory)\employee-app\dist",
+          "$(Build.SourcesDirectory)\dist\employee-app",
+          "$(Build.SourcesDirectory)\employee-app\dist\employee-app"
+      )
+      
+      foreach ($dir in $possibleDirs) {
+          Write-Host "Checking if build output exists at: $dir"
+          if (Test-Path $dir) {
+              Write-Host "✅ Found build directory at: $dir"
+              $buildDir = $dir
+              $foundBuildDir = $true
+              break
+          }
+      }
+      
+      if (-not $foundBuildDir) {
+          throw "🛑 Could not find Angular build output directory! Build may have failed."
+      }
+      
+      # 2) Configure Git
+      git config --global user.name "Azure DevOps Pipeline"
+      git config --global user.email "ci-bot@yourdomain.com"
+      
+      # 3) Prepare 'out' folder
+      if (Test-Path out) { Remove-Item -Recurse -Force out }
+      $repoUrl = "https://$(GITHUB_TOKEN)@github.com/krunal12345/employee-system.git"
+      
+      # 4) Clone gh-pages branch
+      git clone --branch gh-pages $repoUrl out
+      if (-not (Test-Path out)) { throw "🛑 git clone failed" }
+      
+      # 5) Wipe old site and copy new build
+      Write-Host "Copying from $buildDir to out folder..."
+      Remove-Item -Recurse -Force out\*
+      Copy-Item -Path "$buildDir\*" -Destination out -Recurse -Force
+      
+      # 6) Commit & push
+      Push-Location out
+      Write-Host "Files to be committed:"
+      Get-ChildItem -Recurse | ForEach-Object { Write-Host $_.FullName }
+      
+      git add --all
+      git commit -m "CI Deploy: $(Build.BuildNumber)" -ErrorAction SilentlyContinue
+      
+      if ($LASTEXITCODE -eq 0) {
+          Write-Host "Changes committed successfully, pushing to GitHub..."
+          git push origin gh-pages --force
+      } else {
+          Write-Host "No changes to commit or commit failed"
+      }
+  env:
+    GITHUB_TOKEN: $(GITHUB_TOKEN)

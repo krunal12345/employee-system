@@ -1,0 +1,5 @@
+
+# Ignore .vs folder in the parent directory
+.vs/
+Api/.vs/
+Api/obj/

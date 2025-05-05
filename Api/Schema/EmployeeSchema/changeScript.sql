@@ -9,7 +9,7 @@ CREATE TABLE Employee (
                       AND DATEADD(YEAR, -22, GETDATE())),
     Address NVARCHAR(200) NOT NULL,
     City NVARCHAR(100) NOT NULL,
-    State CHAR(2) NOT NULL,
+    State NVARCHAR(20) NOT NULL,
     Zip CHAR(10) NOT NULL, 
     Phone VARCHAR(20) NOT NULL,
     JoinDate DATE NOT NULL,
